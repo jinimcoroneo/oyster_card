@@ -7,6 +7,7 @@ attr_accessor :in_transit
 
 STARTING_BALANCE = 0
 LIMIT = 90
+MINIMUM = 1
 
 def initialize(balance = STARTING_BALANCE)
   @balance = balance
@@ -23,11 +24,13 @@ def deduct(amount)
 end
 
 def touch_in
+  raise "Less than £#{MINIMUM} funds" if @balance < MINIMUM
   @in_transit= true
 end
 
 def touch_out
   @in_transit = false
+  deduct(MINIMUM)
 end
 
 def in_journey?

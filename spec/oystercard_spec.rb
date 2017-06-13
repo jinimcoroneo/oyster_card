@@ -6,16 +6,21 @@ describe Oystercard do
   subject(:card) { described_class.new }
 
   describe "attributes" do
+    card2 = Oystercard.new
     it {is_expected.to respond_to(:balance)}
 
     it "should have a balance when initialized" do
-      expect(card.balance).to eq 0
+      expect(card2.balance).to eq 0
     end
+  end
+
+  before do
+    card.top_up(2)
   end
 
   describe "#top_up" do
     it "should add the argument to the balance" do
-      expect{ card.top_up(5) }.to change{ card.balance }.from(0).to(5)
+      expect{ card.top_up(5) }.to change{ card.balance }.from(2).to(7)
       end
 
     it "raises error if max balance exceeded" do
@@ -31,18 +36,28 @@ describe Oystercard do
     end
 
      it "will deduct the amount passed from balance" do
-       expect { card.deduct(5) }.to change { card.balance }.from(10).to(5)
+       expect { card.deduct(5) }.to change { card.balance }.from(12).to(7)
      end
 
   end
 
   describe "#touch_in" do
 
-    #set up so that card has money.
-
     it "changes @in_transit to \'true\'" do
        expect { card.touch_in }.to change { card.in_transit}.from(false).to(true)
     end
+
+    context "when balance below £1" do
+
+      before do
+        card.deduct(2)
+      end
+
+      it "raises an error" do
+        expect {card.touch_in}.to raise_error("Less than £#{Oystercard::MINIMUM} funds")
+      end
+    end
+
   end
 
   describe "#touch_out" do
@@ -53,6 +68,10 @@ describe Oystercard do
 
     it "changes @in_transit to \'false\'" do
        expect { card.touch_out }.to change { card.in_transit}.from(true).to(false)
+    end
+
+    it "charges the card" do
+       expect { card.touch_out }.to change { card.balance}.from(card.balance).to(card.balance - Oystercard::MINIMUM)
     end
 
 
