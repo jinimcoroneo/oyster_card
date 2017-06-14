@@ -2,11 +2,14 @@
 require 'oystercard'
 
 describe Oystercard do
+  let(:station) { double(:angel) }
   subject(:card) { described_class.new }
 
   describe 'attributes' do
     card2 = Oystercard.new
     it { is_expected.to respond_to(:balance) }
+    it { is_expected.to respond_to(:entry_station) }
+    it { is_expected.to respond_to(:touch_in).with(1).argument}
 
     it 'should have a balance when initialized' do
       expect(card2.balance).to eq 0
@@ -29,8 +32,9 @@ describe Oystercard do
   end
 
   describe '#touch_in' do
-    it "changes @in_transit to \'true\'" do
-      expect { card.touch_in }.to change { card.in_transit }.from(false).to(true)
+    it "should be in journey" do
+      card.touch_in(station)
+      expect(card).to be_in_journey
     end
 
     context 'when balance below £1' do
@@ -40,29 +44,35 @@ describe Oystercard do
       end
 
       it 'raises an error' do
-        expect { card.touch_in }.to raise_error("Less than £#{Oystercard::MINIMUM} funds")
+        expect { card.touch_in(station) }.to raise_error("Less than £#{Oystercard::MINIMUM} funds")
       end
     end
   end
 
   describe '#touch_out' do
     before do
-      card.touch_in
+      card.touch_in(station)
     end
 
-    it "changes @in_transit to \'false\'" do
-      expect { card.touch_out }.to change { card.in_transit }.from(true).to(false)
+    it "should not be @in_journey" do
+      card.touch_out
+      expect(card).not_to be_in_journey
     end
 
     it 'charges the card' do
       expect { card.touch_out }.to change { card.balance }.from(card.balance).to(card.balance - Oystercard::MINIMUM)
+    end
+
+    it "deletes the entry station" do
+      card.touch_out
+      expect(card.entry_station).to eq nil
     end
   end
 
   describe '#in_journey?' do
     context 'when user is in transit' do
       before do
-        card.touch_in
+        card.touch_in(station)
       end
 
       it 'returns true' do
@@ -76,4 +86,13 @@ describe Oystercard do
       end
     end
   end
+
+  describe "#entry_station" do
+    it "returns the entry station" do
+      card.touch_in(station)
+      expect(card.entry_station).to eq station
+    end
+  end
+
+
 end
