@@ -3,13 +3,16 @@ require 'oystercard'
 
 describe Oystercard do
   let(:station) { double(:angel) }
+  let(:exit_station) { double(:waterloo) }
   subject(:card) { described_class.new }
 
   describe 'attributes' do
     card2 = Oystercard.new
     it { is_expected.to respond_to(:balance) }
     it { is_expected.to respond_to(:entry_station) }
+    it { is_expected.to respond_to(:touch_out).with(1).argument}
     it { is_expected.to respond_to(:touch_in).with(1).argument}
+    it { is_expected.to respond_to(:previous_trips) }
 
     it 'should have a balance when initialized' do
       expect(card2.balance).to eq 0
@@ -39,8 +42,8 @@ describe Oystercard do
 
     context 'when balance below £1' do
       before do
-        card.touch_out
-        card.touch_out
+        card.touch_out(exit_station)
+        card.touch_out(exit_station)
       end
 
       it 'raises an error' do
@@ -55,17 +58,22 @@ describe Oystercard do
     end
 
     it "should not be @in_journey" do
-      card.touch_out
+      card.touch_out(exit_station)
       expect(card).not_to be_in_journey
     end
 
     it 'charges the card' do
-      expect { card.touch_out }.to change { card.balance }.from(card.balance).to(card.balance - Oystercard::MINIMUM)
+      expect { card.touch_out(exit_station) }.to change { card.balance }.from(card.balance).to(card.balance - Oystercard::MINIMUM)
     end
 
     it "deletes the entry station" do
-      card.touch_out
+      card.touch_out(exit_station)
       expect(card.entry_station).to eq nil
+    end
+
+    it "should add our journey to previous trips" do
+      card.touch_out(exit_station)
+      expect(card.previous_trips).to eq ([{entry: station, exit: exit_station}])
     end
   end
 
