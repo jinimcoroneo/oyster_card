@@ -1,6 +1,9 @@
 
+require_relative "station.rb"
+require_relative "journey.rb"
+
 class Oystercard
-  attr_reader :balance, :entry_station, :previous_trips
+  attr_reader :balance, :entry_station, :previous_trips, :journey
 
 
   STARTING_BALANCE = 0
@@ -19,17 +22,18 @@ class Oystercard
 
   def touch_in(station)
     raise "Less than £#{MINIMUM} funds" if @balance < MINIMUM
-    @entry_station = station
+    #@entry_station = station #need to remove
+    @journey = Journey.new(station)
   end
 
   def touch_out(station)
-    record_journey(entry_station,station)
+    var = @journey.record_journey(station)
+    @previous_trips.push(var)
     deduct(MINIMUM)
-    @entry_station = nil
   end
 
   def in_journey?
-    @entry_station != nil
+    @journey != nil
   end
 
 
@@ -38,8 +42,4 @@ class Oystercard
     @balance -= amount
   end
 
-  def record_journey(entry_station,exit_station)
-    journey = {entry: entry_station, exit: exit_station}
-    @previous_trips.push(journey)
-  end
 end
