@@ -1,41 +1,40 @@
 
 class Oystercard
+  attr_reader :balance
 
-attr_reader :balance
+  attr_accessor :in_transit
 
-attr_accessor :in_transit
+  STARTING_BALANCE = 0
+  LIMIT = 90
+  MINIMUM = 1
 
-STARTING_BALANCE = 0
-LIMIT = 90
-MINIMUM = 1
+  def initialize(balance = STARTING_BALANCE)
+    @balance = balance
+    @in_transit = false
+  end
 
-def initialize(balance = STARTING_BALANCE)
-  @balance = balance
-  @in_transit = false
-end
+  def top_up(amount)
+    raise "Max balance #{LIMIT} exceeded" if (@balance + amount) > LIMIT
+    @balance += amount
+  end
 
-def top_up(amount)
-  raise "Max balance #{LIMIT} exceeded" if ((@balance + amount) > LIMIT)
-  @balance += amount
-end
+  def touch_in
+    raise "Less than £#{MINIMUM} funds" if @balance < MINIMUM
+    @in_transit = true
+  end
 
-def deduct(amount)
-  @balance -= amount
-end
+  def touch_out
+    @in_transit = false
+    deduct(MINIMUM)
+  end
 
-def touch_in
-  raise "Less than £#{MINIMUM} funds" if @balance < MINIMUM
-  @in_transit= true
-end
+  def in_journey?
+    in_transit
+  end
 
-def touch_out
-  @in_transit = false
-  deduct(MINIMUM)
-end
+  private
 
-def in_journey?
-  in_transit
-end
-
-
+  def deduct(amount)
+    @balance -= amount
+  end
 end

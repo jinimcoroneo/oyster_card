@@ -1,15 +1,14 @@
 
-require "oystercard"
+require 'oystercard'
 
 describe Oystercard do
-
   subject(:card) { described_class.new }
 
-  describe "attributes" do
+  describe 'attributes' do
     card2 = Oystercard.new
-    it {is_expected.to respond_to(:balance)}
+    it { is_expected.to respond_to(:balance) }
 
-    it "should have a balance when initialized" do
+    it 'should have a balance when initialized' do
       expect(card2.balance).to eq 0
     end
   end
@@ -18,96 +17,63 @@ describe Oystercard do
     card.top_up(2)
   end
 
-  describe "#top_up" do
-    it "should add the argument to the balance" do
-      expect{ card.top_up(5) }.to change{ card.balance }.from(2).to(7)
-      end
+  describe '#top_up' do
+    it 'should add the argument to the balance' do
+      expect { card.top_up(5) }.to change { card.balance }.from(2).to(7)
+    end
 
-    it "raises error if max balance exceeded" do
+    it 'raises error if max balance exceeded' do
       over_limit = Oystercard::LIMIT + 1
       expect { card.top_up(over_limit) }.to raise_error("Max balance #{Oystercard::LIMIT} exceeded")
     end
   end
 
-  describe "#deduct" do
-
-    before do
-      card.top_up(10)
-    end
-
-     it "will deduct the amount passed from balance" do
-       expect { card.deduct(5) }.to change { card.balance }.from(12).to(7)
-     end
-
-  end
-
-  describe "#touch_in" do
-
+  describe '#touch_in' do
     it "changes @in_transit to \'true\'" do
-       expect { card.touch_in }.to change { card.in_transit}.from(false).to(true)
+      expect { card.touch_in }.to change { card.in_transit }.from(false).to(true)
     end
 
-    context "when balance below £1" do
-
+    context 'when balance below £1' do
       before do
-        card.deduct(2)
+        card.touch_out
+        card.touch_out
       end
 
-      it "raises an error" do
-        expect {card.touch_in}.to raise_error("Less than £#{Oystercard::MINIMUM} funds")
+      it 'raises an error' do
+        expect { card.touch_in }.to raise_error("Less than £#{Oystercard::MINIMUM} funds")
       end
     end
-
   end
 
-  describe "#touch_out" do
-
+  describe '#touch_out' do
     before do
       card.touch_in
     end
 
     it "changes @in_transit to \'false\'" do
-       expect { card.touch_out }.to change { card.in_transit}.from(true).to(false)
+      expect { card.touch_out }.to change { card.in_transit }.from(true).to(false)
     end
 
-    it "charges the card" do
-       expect { card.touch_out }.to change { card.balance}.from(card.balance).to(card.balance - Oystercard::MINIMUM)
+    it 'charges the card' do
+      expect { card.touch_out }.to change { card.balance }.from(card.balance).to(card.balance - Oystercard::MINIMUM)
     end
-
-
   end
 
-  describe "#in_journey?" do
-
-    context "when user is in transit" do
-
+  describe '#in_journey?' do
+    context 'when user is in transit' do
       before do
         card.touch_in
       end
 
-      it "returns true" do
+      it 'returns true' do
         expect(card).to be_in_journey
       end
-
     end
 
-    context "when user is not in transit" do
-
-      it "returns false" do
+    context 'when user is not in transit' do
+      it 'returns false' do
         expect(card).not_to be_in_journey
       end
-
     end
-
-
-
   end
-
-
-
-
-
-
-
-
 end
