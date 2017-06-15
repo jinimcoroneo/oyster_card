@@ -1,12 +1,14 @@
 class Journey
-attr_reader :entry_station
+attr_accessor :entry_station, :exit_station
 
-  def initialize(station)
-    @entry_station = station
+
+  def initialize(entry_station, exit_station = nil)
+    @entry_station = entry_station
+    @exit_station = exit_station
   end
 
-  def record_journey(exit_station)
-    @journey = {entry: @entry_station, exit: exit_station}
+  def set_exit_station(exit_station)
+    @exit_station = exit_station
   end
 
 end
