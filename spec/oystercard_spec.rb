@@ -9,21 +9,12 @@ describe Oystercard do
 
   subject(:card) { described_class.new(1) }
 
+  card2 = Oystercard.new
 
-  describe 'attributes' do
-    card2 = Oystercard.new
-    it { is_expected.to respond_to(:balance) }
-    it { is_expected.to respond_to(:entry_station) }
-    it { is_expected.to respond_to(:touch_out).with(1).argument}
-    it { is_expected.to respond_to(:touch_in).with(1).argument}
-    it { is_expected.to respond_to(:previous_trips) }
-    it { is_expected.to respond_to(:journey) }
+  describe "#initialize" do
 
-
-    describe "#previous_trips" do
-      it "starts with an empty list of journeys" do
-        expect(card.previous_trips).to eq []
-      end
+    it "starts with an empty list of journeys" do
+      expect(card.journey_history).to eq []
     end
 
     it 'should have a balance when initialized' do
@@ -32,7 +23,7 @@ describe Oystercard do
   end
 
   describe '#top_up' do
-    it 'should add the argument to the balance' do
+    it 'should add the amount to the balance' do
       expect { card.top_up(5) }.to change { card.balance }.from(1).to(6)
     end
 
@@ -48,60 +39,44 @@ describe Oystercard do
 
       it "should create a new journey" do
         card.touch_in(station)
-        expect(card.journey).to be_an_instance_of(Journey)
+        expect(card.new_journey).to be_an_instance_of(Journey)
       end
 
       it "should be in journey" do
-
         card.touch_in(station)
         expect(card).to be_in_journey
       end
 
-      context 'when balance below £1' do
-        before do
-          card.touch_in(station)
-          card.touch_out(exit_station)
-        end
-
-        it 'raises an error' do
-          expect { card.touch_in(station) }.to raise_error("Less than £#{Oystercard::MINIMUM} funds")
-        end
+      it 'raises an error' do
+        expect { card2.touch_in(station) }.to raise_error("Less than £#{Oystercard::MINIMUM} funds")
       end
     end
-
   end
-
 
   describe '#touch_out' do
     context "when journey ends" do
       before do
         card.touch_in(station)
-        card.touch_out(exit_station)
-      end
-
-      pending "should not be @in_journey" do
-        expect(card).not_to be_in_journey
       end
 
       it 'charges the card' do
-        expect { card.touch_out(exit_station) }.to change { card.balance }.from(card.balance).to(card.balance - Oystercard::MINIMUM)
+        expect { card.touch_out(exit_station) }.to change { card.balance }.by(- Oystercard::MINIMUM)
       end
 
-      it "deletes the entry station" do
-        expect(card.entry_station).to eq nil
-      end
-
-      it "should add our journey to previous trips" do
-        expect(card.previous_trips.last).to eq ({entry: station, exit: exit_station})
+      it "should add our journey to journey history" do
+        card.touch_out(exit_station)
+        expect(card.journey_history.last).to eq (card.new_journey)
       end
     end
   end
 
   describe '#in_journey?' do
+
+    before do
+      card.touch_in(station)
+    end
+
     context 'when user is in transit' do
-      before do
-        card.touch_in(station)
-      end
 
       it 'returns true' do
         expect(card).to be_in_journey
@@ -110,12 +85,9 @@ describe Oystercard do
 
     context 'when user is not in transit' do
       it 'returns false' do
+        card.touch_out(exit_station)
         expect(card).not_to be_in_journey
       end
     end
   end
-
-
-
-
 end

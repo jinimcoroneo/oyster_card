@@ -39,11 +39,12 @@ class Oystercard
   end
 
   def in_journey?
-    @journey != nil
+    @new_journey.entry_station && @new_journey.exit_station == nil
   end
 
 
   private
+  
   def deduct(amount)
     @balance -= amount
   end
