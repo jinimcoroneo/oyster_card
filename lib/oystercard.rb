@@ -19,17 +19,17 @@ class Oystercard
     @balance += amount
   end
 
-  def touch_in(entry_station)
+  def touch_in(entry_station, journey)
     raise "Less than £#{MINIMUM} funds" if @balance < MINIMUM
-    new_journey_start(entry_station)
+    journey.start(entry_station)
   end
 
-  def new_journey_start(entry_station)
-    @new_journey = Journey.new(entry_station)
-  end
+  # def new_journey_start(entry_station)
+  #   @new_journey = Journey.new(entry_station)
+  # end
 
   def touch_out(exit_station)
-    @new_journey.set_exit_station(exit_station)
+    journey.finish(exit_station)
     deduct(MINIMUM)
     store_journey
   end
@@ -44,7 +44,7 @@ class Oystercard
 
 
   private
-  
+
   def deduct(amount)
     @balance -= amount
   end
