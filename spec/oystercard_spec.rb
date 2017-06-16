@@ -1,19 +1,17 @@
 
 require 'oystercard'
 
-
 describe Oystercard do
   let(:station) { double(:angel) }
   let(:exit_station) { double(:waterloo) }
-  let(:journey) { double(:journey, :entry => :angel, :exit => :waterloo) }
+  let(:journey) { double(:journey, entry: :angel, exit: :waterloo) }
 
   subject(:card) { described_class.new(1) }
 
   card2 = Oystercard.new
 
-  describe "#initialize" do
-
-    it "starts with an empty list of journeys" do
+  describe '#initialize' do
+    it 'starts with an empty list of journeys' do
       expect(card.journey_history).to eq []
     end
 
@@ -34,15 +32,13 @@ describe Oystercard do
   end
 
   describe '#touch_in' do
-
-    context "when journey starts" do
-
-      it "should create a new journey" do
+    context 'when journey starts' do
+      it 'should create a new journey' do
         card.touch_in(station)
         expect(card.new_journey).to be_an_instance_of(Journey)
       end
 
-      it "should be in journey" do
+      it 'should be in journey' do
         card.touch_in(station)
         expect(card).to be_in_journey
       end
@@ -54,7 +50,7 @@ describe Oystercard do
   end
 
   describe '#touch_out' do
-    context "when journey ends" do
+    context 'when journey ends' do
       before do
         card.touch_in(station)
       end
@@ -63,21 +59,19 @@ describe Oystercard do
         expect { card.touch_out(exit_station) }.to change { card.balance }.by(- Oystercard::MINIMUM)
       end
 
-      it "should add our journey to journey history" do
+      it 'should add our journey to journey history' do
         card.touch_out(exit_station)
-        expect(card.journey_history.last).to eq (card.new_journey)
+        expect(card.journey_history.last).to eq card.new_journey
       end
     end
   end
 
   describe '#in_journey?' do
-
     before do
       card.touch_in(station)
     end
 
     context 'when user is in transit' do
-
       it 'returns true' do
         expect(card).to be_in_journey
       end
