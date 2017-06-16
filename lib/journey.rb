@@ -1,6 +1,8 @@
 class Journey
 attr_reader :entry_station, :exit_station
 
+NORMAL = 1
+PENALTY = 6
 
   def initialize(entry_station = nil, exit_station = nil)
     @entry_station = entry_station
@@ -17,6 +19,14 @@ attr_reader :entry_station, :exit_station
 
   def complete?
     !!entry_station && exit_station
+  end
+
+  def fare
+    if complete?
+      NORMAL
+    else
+      PENALTY
+    end
   end
 
 end
