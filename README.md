@@ -1,3 +1,1 @@
-#oystercard
-
-## A simple command line oystercard simulation
+# A simple command line oystercard simulation
